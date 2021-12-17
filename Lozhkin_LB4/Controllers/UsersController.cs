@@ -10,37 +10,37 @@ namespace Lozhkin_LB4.Controllers
         private TextFileDatabase database = new TextFileDatabase();
 
         [HttpPost]
-        public IActionResult Add([FromBody]UsersModel users)
+        public IActionResult Add([FromBody]UserModel user)
         {
-            database.AddUsers(users);
+            database.AddUser(user);
             return Ok();
         }
 
         [HttpDelete]
         public IActionResult Remove(int id)
         {
-            database.RemoveUsers(id);
+            database.RemoveUser(id);
             return Ok();
         }
 
         [HttpPost]
-        public IActionResult Modify([FromBody] ModifyRequestModel<UsersModel> modifyRequest)
+        public IActionResult Modify([FromBody] ModifyRequestModel<UserModel> modifyRequest)
         {
-            database.EditUsers(modifyRequest.Id, modifyRequest.Entity);
+            database.EditUser(modifyRequest.Id, modifyRequest.Entity);
             return Ok();
         }
 
         [HttpGet]
         public IActionResult Get(int id)
         {
-            var users = database.GetUsersId(id);
+            var user = database.GetUserById(id);
 
-            if(users == null)
+            if(user == null)
             {
-                return new JsonResult(new ErrorModel("No users found by that id"));
+                return new JsonResult(new ErrorModel("No user found by that id"));
             }
 
-            return new JsonResult(users);
+            return new JsonResult(user);
         }
     }
 }

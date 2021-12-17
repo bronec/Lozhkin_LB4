@@ -3,18 +3,18 @@ using System.Text.Json.Serialization;
 
 namespace Lozhkin_LB4.Models
 {
-    public class UsersModel
+    public class UserModel
     {
         [DisplayName("Идентификатор")]
         [JsonPropertyName("id")]
         public int Id { get; set; }
 
-        [DisplayName("Название")]
+        [DisplayName("Имя")]
         [JsonPropertyName("name")]
         public string Name { get; set; }
 
         [DisplayName("Доступ")]
-        [JsonPropertyName("accsess")]
-        public string Price { get; set; }
+        [JsonPropertyName("access")]
+        public string Access { get; set; }
     }
 }

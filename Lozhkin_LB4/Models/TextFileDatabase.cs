@@ -11,10 +11,64 @@ namespace Lozhkin_LB4.Models
         private string databasePath = "";
         public TextFileDatabase()
         {
-            databasePath = Path.Combine(Directory.GetCurrentDirectory(), "UsersDatabase.txt");
+            databasePath = Path.Combine(Directory.GetCurrentDirectory(), "UserDatabase.txt");
         }
 
-        private List<UsersModel> GetUsers()
+        public void AddUser(UserModel item)
+        {
+            ExecuteQuery(x => x.Add(item), "Add user");
+        }
+
+        public UserModel GetUserById(int id)
+        {
+            UserModel user = null;
+            ExecuteQuery(x => user = x.FirstOrDefault(x => x.Id == id), "Get user by Id");
+            return user;
+        }
+
+        public void EditUser(int id, UserModel user)
+        {
+            ExecuteQuery(users =>
+            {
+                if (users.Any(x => x.Id == id))
+                {
+                    users.Remove(users.First(x => x.Id == id));
+                    users.Add(user);
+                }
+            }, "Edit user");
+        }
+
+        public void RemoveUser(int id)
+        {
+            ExecuteQuery(users =>
+            {
+                if (users.Any(x => x.Id == id))
+                {
+                    users.Remove(users.First(x => x.Id == id));
+                }
+            }, "Remove user");
+        }
+
+        private void ExecuteQuery(Action<List<UserModel>> query, string actionName)
+        {
+            Console.WriteLine($"Executing operation with database. {actionName}");
+            var users = GetUsers();
+            query(users);
+            SaveUsers(users);
+        }
+
+        private void SaveUsers(List<UserModel> users)
+        {
+            using (var fs = new FileStream(databasePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+            using (var strReader = new StreamWriter(fs))
+            {
+                var jsonWriter = new JsonTextWriter(strReader);
+
+                JsonSerializer.CreateDefault().Serialize(jsonWriter, users);
+            }
+        }
+
+        private List<UserModel> GetUsers()
         {
             var existing = new FileInfo(databasePath).Exists;
             using (var fs = new FileStream(Path.Combine(databasePath), FileMode.OpenOrCreate, FileAccess.ReadWrite))
@@ -23,60 +77,9 @@ namespace Lozhkin_LB4.Models
                 var jsonReader = new JsonTextReader(strReader);
 
                 return existing
-                    ? JsonSerializer.CreateDefault().Deserialize<List<UsersModel>>(jsonReader)
-                    : new List<UsersModel>();
+                    ? JsonSerializer.CreateDefault().Deserialize<List<UserModel>>(jsonReader)
+                    : new List<UserModel>();
             }
-        }
-
-
-        public UsersModel GetUsersId(int id)
-        {
-            UsersModel product = null;
-            ExecuteQuery(x => product = x.FirstOrDefault(x => x.Id == id),"Get product by Id");
-            return product;
-        }
-        private void SaveUsers(List<UsersModel> products)
-        {
-            using (var fs = new FileStream(databasePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
-            using (var strReader = new StreamWriter(fs))
-            {
-                var jsonWriter = new JsonTextWriter(strReader);
-
-                JsonSerializer.CreateDefault().Serialize(jsonWriter, products);
-            }
-        }
-        public void EditUsers(int id, UsersModel product)
-        {
-            ExecuteQuery(products =>
-            {
-                if (products.Any(x => x.Id == id))
-                {
-                    products.Remove(products.First(x => x.Id == id));
-                    products.Add(product);
-                }
-            }, "Edit product");
-        }
-        public void AddUsers(UsersModel item)
-        {
-            ExecuteQuery(x => x.Add(item), "Add product");
-        }
-        public void RemoveUsers(int id)
-        {
-            ExecuteQuery(products =>
-            {
-                if (products.Any(x => x.Id == id))
-                {
-                    products.Remove(products.First(x => x.Id == id));
-                }
-            }, "Remove product");
-        }
-
-        private void ExecuteQuery(Action<List<UsersModel>> query, string actionName)
-        {
-            Console.WriteLine($"Executing operation with database. {actionName}");
-            var products = GetUsers();
-            query(products);
-            SaveUsers(products);
         }
     }
 }
